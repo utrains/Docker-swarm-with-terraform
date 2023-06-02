@@ -47,6 +47,20 @@ resource "aws_security_group" "web-sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
     }
+  ingress {
+    description = "swarm ports"
+    from_port   = 8021
+    to_port     = 8021
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    }
+ingress {
+    description = "swarm ports"
+    from_port   = 8020
+    to_port     = 8020
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    }
     egress {
       from_port   = 0
       to_port     = 0
