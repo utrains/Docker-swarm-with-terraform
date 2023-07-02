@@ -52,7 +52,7 @@ resource "null_resource" "InitMaster" {
   }
 
   provisioner "local-exec" {
-    command = "sleep 60"
+    command = "echo 60"
   }
 
 
