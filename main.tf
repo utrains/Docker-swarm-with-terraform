@@ -47,12 +47,10 @@ module "ec2_instance" {
 resource "null_resource" "InitMaster" {
     depends_on = [module.ec2_instance["master"]]
 
-    triggers = {
-    wait = timestamp()
-  }
+   
 
-  provisioner "local-exec" {
-    command = "echo 60"
+ provisioner "local-exec" {
+    command = "sleep 300"
   }
 
 
