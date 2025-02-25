@@ -1,8 +1,64 @@
 
-# create default vpc if one does not exit
+# Create a VPC
 
-resource "aws_default_vpc" "default_vpc" {
-} 
+resource "aws_vpc" "lab_vpc" {
+
+  cidr_block           = var.VPC_cidr
+  enable_dns_support   = "true" #gives you an internal domain name
+  enable_dns_hostnames = "true" #gives you an internal host name
+  instance_tenancy     = "default"
+
+  tags = {
+    Name = "${var.project-name}-VPC"
+  }
+
+}
+
+# Create an Internet Gateway
+
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.lab_vpc.id
+
+  tags = {
+    Name = "${var.project-name}-igw"
+  }
+}
+
+# Create a route table
+
+resource "aws_route_table" "public_rt" {
+  vpc_id = aws_vpc.lab_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+
+  tags = {
+    Name = "${var.project-name}-public-route-table"
+  }
+}
+
+# Associate the route table with the public subnet
+
+resource "aws_route_table_association" "public_assoc" {
+  subnet_id      = aws_subnet.public_subnet.id
+  route_table_id = aws_route_table.public_rt.id
+}
+
+# Create a public subnet
+
+resource "aws_subnet" "public_subnet" {
+
+  vpc_id                  = aws_vpc.lab_vpc.id
+  cidr_block              = var.public_subnet_cidr
+  map_public_ip_on_launch = true
+  availability_zone       = var.AZ
+
+  tags = {
+    Name = "${var.project-name}-public-subnet"
+  }
+}
 
 #data for amazon linux
 
@@ -24,17 +80,17 @@ module "ec2_instance" {
   
   for_each = {
     "master"    = { instance_type = "t3.micro", name = "master-instance", user_data = local.install_script },
-    "node1"     = { instance_type = "t3.micro", name = "node1-instance", user_data = local.install_script },
-    "node2"     = { instance_type = "t3.small", name = "node2-instance", user_data = local.install_script }
+    "node1"     = { instance_type = "t3.micro", name = "node1-instance" , user_data = local.install_script },
+    "node2"     = { instance_type = "t3.small", name = "node2-instance" , user_data = local.install_script }
   }
 
   name                   = "${each.value.name}"
-   
   ami                    = "${data.aws_ami.amazon-2.id}"
   instance_type          = "${each.value.instance_type}"
   key_name               = aws_key_pair.ec2_key.key_name
   monitoring             = true
-  user_data            = "${each.value.user_data}"
+  user_data              = "${each.value.user_data}"
+  subnet_id              = aws_subnet.public_subnet.id
   vpc_security_group_ids = ["${aws_security_group.web-sg.id}"]
   
 
