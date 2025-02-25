@@ -1,8 +1,11 @@
-  # Create Web Security Group
+  
+# Create Web Security Group
+
 resource "aws_security_group" "web-sg" {
-    name        = var.sgName
+
+    name        = "${var.project-name}-SG"
     description = "Allow ssh inbound traffic"
-    vpc_id      = aws_default_vpc.default_vpc.id
+    vpc_id      = aws_vpc.lab_vpc.id
   
     ingress {
       description = "ssh from VPC"
