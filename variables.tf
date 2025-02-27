@@ -27,7 +27,7 @@ variable "public_subnet_cidr" {
 
 variable "AZ" {
   type = string
-  default = "us-east-2a"
+  default = "us-east-1a"
 }
 
 variable "project-name" {
